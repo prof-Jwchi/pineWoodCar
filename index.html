@@ -162,6 +162,81 @@
     border-radius: 10px;
     border: 1px solid var(--border);
     display: block;
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    aspect-ratio: 800 / 500;
+  }
+  .canvas-wrap { width: 100%; }
+
+  /* 캔버스 바로 아래 출발/리셋 (모든 화면에서 표시) */
+  .canvas-controls {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    max-width: 800px;
+    margin-top: 8px;
+  }
+  .canvas-controls button {
+    flex: 1;
+    padding: 12px 8px;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  }
+
+  /* ============== 모바일 / 태블릿 ============== */
+  @media (max-width: 1080px) {
+    .app {
+      grid-template-columns: 1fr;
+      gap: 10px;
+      padding: 8px;
+    }
+    /* 모바일에서는 캔버스 먼저, 결과, 설정 순으로 배치 */
+    .canvas-wrap { order: 1; position: sticky; top: 0; z-index: 10; background: var(--bg); padding-bottom: 6px; }
+    .canvas-controls { margin-top: 6px; }
+    .canvas-controls button { font-size: 15px; padding: 14px 8px; }
+    #rightPanel { order: 2; }
+    #leftPanel { order: 3; }
+
+    .panel {
+      max-height: none;
+      padding: 12px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .top-banner {
+      font-size: 19px;
+      padding: 10px 6px 4px;
+      letter-spacing: 0.5px;
+    }
+    .top-banner .accent { margin: 0 4px; }
+    .app { padding: 6px; gap: 8px; }
+    .panel { padding: 12px; border-radius: 8px; }
+    h1 { font-size: 20px; margin-bottom: 10px; }
+    h2 { font-size: 15px; margin: 14px 0 8px; }
+    button { padding: 14px 8px; font-size: 16px; }   /* 손가락 터치 영역 확보 */
+    .btn-row { gap: 6px; margin-top: 8px; }
+    input[type="range"] { height: 6px; }
+    input[type="range"]::-webkit-slider-thumb { width: 22px; height: 22px; }  /* 터치 핸들 크게 */
+    input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; }
+    .ctrl { margin-bottom: 14px; }
+    .ctrl-row { font-size: 15px; margin-bottom: 6px; }
+    .ctrl-val { font-size: 14px; padding: 2px 9px; }
+    .check-row { font-size: 15px; padding: 4px 0; }
+    .stat { font-size: 15px; padding: 8px 0; }
+    .stat-val.big { font-size: 24px; }
+    .warn-box { font-size: 14px; padding: 10px; }
+    .theory { font-size: 14px; line-height: 1.7; padding: 10px 12px; }
+    .record-item { font-size: 14px; padding: 8px 10px; }
+    .canvas-controls button { font-size: 17px; padding: 16px 8px; }
+    .bottom-banner { font-size: 13px; padding: 10px; }
+  }
+
+  /* 가로 모드 폰: 캔버스가 너무 작아지지 않도록 */
+  @media (max-width: 900px) and (orientation: landscape) and (max-height: 500px) {
+    .top-banner { font-size: 13px; padding: 4px; }
+    .canvas-wrap { position: static; }
   }
 
   /* results */
@@ -250,10 +325,6 @@
     <h1>⚙️ 차량 설정</h1>
 
     <div class="btn-row" style="margin-top:0;">
-      <button id="startBtn">▶ 출발</button>
-      <button id="resetBtn" class="secondary">↺ 리셋</button>
-    </div>
-    <div class="btn-row">
       <button id="saveBtn" class="secondary">💾 기록 저장</button>
       <button id="clearRecBtn" class="secondary">🗑 비교 초기화</button>
     </div>
@@ -308,8 +379,8 @@
     </div>
 
     <div class="ctrl">
-      <div class="ctrl-row"><span class="ctrl-name">트랙 길이 <span style="color:#7aa">(경사 4m + 평지)</span></span><span class="ctrl-val" id="trkVal">10.0 m</span></div>
-      <input type="range" id="trk" min="5" max="15" step="0.5" value="10" />
+      <div class="ctrl-row"><span class="ctrl-name">트랙 길이 <span style="color:#7aa">(경사 4m + 평지)</span></span><span class="ctrl-val" id="trkVal">7.0 m</span></div>
+      <input type="range" id="trk" min="5" max="15" step="0.5" value="7" />
     </div>
 
     <h2>이론 검증</h2>
@@ -328,10 +399,6 @@
     <label class="check-row"><input type="checkbox" id="showAxes" /> 차체 좌표축 표시</label>
 
     <div class="btn-row">
-      <button id="startBtn">▶ 출발</button>
-      <button id="resetBtn" class="secondary">↺ 리셋</button>
-    </div>
-    <div class="btn-row">
       <button id="saveBtn" class="secondary">💾 기록 저장</button>
       <button id="clearRecBtn" class="secondary">🗑 비교 초기화</button>
     </div>
@@ -344,10 +411,14 @@
   <!-- ============== 중앙 캔버스 ============== -->
   <div class="canvas-wrap">
     <canvas id="scene" width="800" height="500"></canvas>
+    <div class="canvas-controls">
+      <button id="startBtn">▶ 출발</button>
+      <button id="resetBtn" class="secondary">↺ 리셋</button>
+    </div>
   </div>
 
   <!-- ============== 우측 결과 패널 ============== -->
-  <div class="panel">
+  <div class="panel" id="rightPanel">
     <h1>📊 실시간 데이터</h1>
 
     <div class="stat">
@@ -440,7 +511,7 @@ const cfg = {
   mu: 0.05,        // 바퀴-축 마찰계수
   CdA: 0.005,      // [m^2] 공기저항계수×단면적
   theta: 30 * Math.PI/180,  // [rad]
-  trackLen: 10,    // [m] 총 트랙
+  trackLen: 7,    // [m] 총 트랙
   showAxes: false
 };
 
@@ -827,10 +898,14 @@ function drawCar(geom) {
   // sim.s = 경사 시작점부터 차량 기준점이 이동한 거리.
   // 차량 기준점은 뒷축 중심이라고 가정 (출발 시 s=0).
 
+  // 시각 확대 비율 (물리에는 영향 없음, 보기 좋게만)
+  const VIS_SCALE = 2.4;
+  const visWheelR = R_WHEEL * VIS_SCALE;
+
   // 실제 차체 길이 = fw + L + rw
   const bodyLenM = cfg.fw + cfg.L + cfg.rw;
   // 차체 높이 (시각화용) — 2h ~ COM 위치를 자연스럽게
-  const bodyHeightM = Math.max(cfg.h * 2, 0.02);
+  const bodyHeightM = Math.max(cfg.h * 2, 0.02) * VIS_SCALE;
 
   // 뒷축 기준 → 차체 뒷단까지 거리 = rw
   // 뒷축 기준 → 차체 앞단까지 = L + fw
@@ -847,7 +922,7 @@ function drawCar(geom) {
 
   // 뒷축 픽셀 위치
   // 단, 트랙 표면에서 바퀴 반지름만큼 위로 (바퀴는 트랙에 접하고 차체는 바퀴 위)
-  const wheelR = R_WHEEL * sc * 2;  // 시각상 약간 크게
+  const wheelR = visWheelR * sc;
   const normalX = Math.sin(ang), normalY = -Math.cos(ang);  // 트랙 법선 (위쪽)
 
   const axleX = p.x + normalX * wheelR;
@@ -867,7 +942,7 @@ function drawCar(geom) {
   const rearX = -px(cfg.rw);
   const frontX = px(cfg.L + cfg.fw);
   // 차체 본체는 바퀴 위에 있다고 보고 y는 모두 음수 방향 (캔버스에서 위쪽)
-  const bodyBottomY = -px(R_WHEEL); // 바퀴 반경의 1배만큼 위로 띄움 (시각적으로)
+  const bodyBottomY = -px(visWheelR * 0.6); // 바퀴 반경에 비례해서 위로 띄움
   const bodyTopY = bodyBottomY - px(bodyHeightM);
 
   // 차체 - 네이비 베이스
@@ -908,21 +983,21 @@ function drawCar(geom) {
   ctx.restore();
 
   // 바퀴 (뒷바퀴 x=0, 앞바퀴 x=px(L))
-  const wheelPx = px(R_WHEEL);
+  const wheelPx = px(visWheelR);
   const wheelAngle = sim.v / R_WHEEL * sim.t;  // 회전각 (시각용)
   drawWheel(0, 0, wheelPx, wheelAngle);
   drawWheel(px(cfg.L), 0, wheelPx, wheelAngle);
 
   // 무게중심 (뒷축에서 +d, 위쪽으로 +h)
   const comX = px(cfg.d);
-  const comY = -px(R_WHEEL) - px(cfg.h);   // 바닥에서 h만큼 위 (차체 좌표)
+  const comY = bodyBottomY - px(cfg.h * VIS_SCALE);   // 바닥에서 h만큼 위 (차체 좌표)
   // 살짝 음영
   ctx.beginPath();
-  ctx.arc(comX, comY, 5.5, 0, Math.PI*2);
+  ctx.arc(comX, comY, 4.5, 0, Math.PI*2);
   ctx.fillStyle = "rgba(0,0,0,0.5)";
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(comX, comY, 4, 0, Math.PI*2);
+  ctx.arc(comX, comY, 3, 0, Math.PI*2);
   ctx.fillStyle = "#ff3030";
   ctx.fill();
   ctx.strokeStyle = "#fff";
@@ -1001,42 +1076,67 @@ function drawWheel(cx, cy, r, angle) {
   ctx.restore();
 }
 
+/**
+ * 캔버스가 CSS로 축소된 비율 보정값.
+ * 모바일에서 캔버스가 작아질수록 HUD/마커 글씨를 크게 그려서
+ * 화면상 가독성이 유지되도록 한다.
+ */
+function uiScale() {
+  const rect = canvas.getBoundingClientRect();
+  if (!rect.width) return 1;
+  const displayScale = rect.width / canvas.width;  // < 1 이면 축소됨
+  // 1.0 ~ 2.2 사이로 clamp
+  return Math.max(1, Math.min(2.2, 1 / displayScale));
+}
+
 function drawHUD(geom) {
-  // 좌측 상단 큰 시간
+  const k = uiScale();
+  const px = (n) => Math.round(n * k);
+  const pad = px(10);
+
+  // 좌하단 큰 시간 (자동차 출발 위치를 가리지 않도록 아래로 배치)
+  const w1 = px(200), h1 = px(56);
+  const eX = pad;
+  const eY = canvas.height - h1 - pad;
   ctx.fillStyle = "rgba(15,26,43,0.85)";
-  ctx.fillRect(10, 10, 200, 56);
+  ctx.fillRect(eX, eY, w1, h1);
   ctx.fillStyle = "#d4a017";
-  ctx.font = "bold 13px sans-serif";
+  ctx.font = `bold ${px(13)}px sans-serif`;
   ctx.textAlign = "left";
-  ctx.fillText("ELAPSED", 20, 28);
+  ctx.fillText("ELAPSED", eX + px(10), eY + px(20));
   ctx.fillStyle = "#fff";
-  ctx.font = "bold 26px monospace";
-  ctx.fillText(`${sim.t.toFixed(3)} s`, 20, 56);
+  ctx.font = `bold ${px(26)}px monospace`;
+  ctx.fillText(`${sim.t.toFixed(3)} s`, eX + px(10), eY + px(46));
 
   // 우상단 상태
+  const w2 = px(160), h2 = px(60);
   ctx.fillStyle = "rgba(15,26,43,0.85)";
-  ctx.fillRect(canvas.width - 160, 10, 150, 56);
+  ctx.fillRect(canvas.width - w2 - pad, pad, w2, h2);
   ctx.fillStyle = "#97a3bd";
-  ctx.font = "11px sans-serif";
+  ctx.font = `${px(11)}px sans-serif`;
   ctx.textAlign = "left";
-  ctx.fillText(sim.onSlope ? "▼ 경사 구간" : "→ 평지 구간", canvas.width - 150, 28);
+  const rx = canvas.width - w2 - pad + px(10);
+  ctx.fillText(sim.onSlope ? "▼ 경사 구간" : "→ 평지 구간", rx, pad + px(18));
   ctx.fillStyle = "#e6edf7";
-  ctx.font = "bold 13px monospace";
-  ctx.fillText(`s = ${sim.s.toFixed(2)} m`, canvas.width - 150, 47);
-  ctx.fillText(`v = ${sim.v.toFixed(2)} m/s`, canvas.width - 150, 62);
+  ctx.font = `bold ${px(13)}px monospace`;
+  ctx.fillText(`s = ${sim.s.toFixed(2)} m`, rx, pad + px(37));
+  ctx.fillText(`v = ${sim.v.toFixed(2)} m/s`, rx, pad + px(53));
 
-  // 비교 기록 표시 (좌하단)
+  // 비교 기록 표시 (ELAPSED 박스 위로 쌓임)
   if (records.length > 0) {
-    let yy = canvas.height - 14 - records.length * 16;
+    const lineH = px(16);
+    const recH = records.length * lineH + px(24);
+    const boxY = eY - px(8) - recH;
+    const yy = boxY + px(18);
     ctx.fillStyle = "rgba(15,26,43,0.85)";
-    ctx.fillRect(10, yy - 18, 220, records.length * 16 + 24);
+    ctx.fillRect(pad, boxY, px(230), recH);
     ctx.fillStyle = "#d4a017";
-    ctx.font = "bold 11px sans-serif";
-    ctx.fillText("저장된 기록", 18, yy - 4);
-    ctx.font = "11px monospace";
+    ctx.font = `bold ${px(11)}px sans-serif`;
+    ctx.fillText("저장된 기록", pad + px(8), yy - px(4));
+    ctx.font = `${px(11)}px monospace`;
     ctx.fillStyle = "#e6edf7";
     records.forEach((r, i) => {
-      ctx.fillText(`${i+1}. ${r.name}  →  ${r.finishTime.toFixed(3)}s`, 18, yy + i*16 + 10);
+      ctx.fillText(`${i+1}. ${r.name}  →  ${r.finishTime.toFixed(3)}s`, pad + px(8), yy + i * lineH + px(10));
     });
   }
 }
@@ -1059,7 +1159,7 @@ function updateLiveStats() {
 
 function finalizeRun() {
   sim.running = false;
-  $("startBtn").textContent = "▶ 출발";
+  syncStartBtnLabel("▶ 출발");
   const avgA = sim.acc.n > 0 ? sim.acc.sum / sim.acc.n : 0;
   $("rFinish").textContent = `${sim.finishTime.toFixed(3)} s`;
   $("rVmax").textContent = `${sim.vMax.toFixed(2)} m/s`;
@@ -1105,6 +1205,10 @@ function updateTheory() {
 }
 
 // ---------------- 제어 ----------------
+function syncStartBtnLabel(label) {
+  $("startBtn").textContent = label;
+}
+
 function resetSim(redraw = true) {
   sim.running = false;
   sim.finished = false;
@@ -1116,7 +1220,7 @@ function resetSim(redraw = true) {
   sim.vBeforeTrans = 0;
   sim.vAfterTrans = 0;
   sim.transLossJ = 0;
-  $("startBtn").textContent = "▶ 출발";
+  syncStartBtnLabel("▶ 출발");
   $("rTime").textContent = "0.000 s";
   $("rPos").textContent = "0.00 m";
   $("rVel").textContent = "0.00 m/s";
@@ -1135,7 +1239,7 @@ function resetSim(redraw = true) {
 function startSim() {
   if (sim.finished) resetSim(false);
   sim.running = !sim.running;
-  $("startBtn").textContent = sim.running ? "⏸ 일시정지" : "▶ 출발";
+  syncStartBtnLabel(sim.running ? "⏸ 일시정지" : "▶ 출발");
 }
 
 function saveRecord() {
